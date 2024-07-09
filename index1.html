@@ -29,8 +29,8 @@
     camera.lookAt(new THREE.Vector3(0, 0, 0));
 
     let controls = new THREE.TrackballControls(camera, renderer.domElement);
-    controls.rotateSpeed = 2.0;
-    controls.zoomSpeed = 1.2;
+    controls.rotateSpeed = 2.5;
+    controls.zoomSpeed = 1.5;
     controls.panSpeed = 0.8;
     controls.staticMoving = true;
 
@@ -64,8 +64,8 @@
     function addFlyControl() {
         if (controls) controls.dispose();
         controls = new THREE.FlyControls(camera, renderer.domElement);
-        controls.movementSpeed = 10;
-        controls.rollSpeed = 0.5;
+        controls.movementSpeed = 5;
+        controls.rollSpeed = 0.4;
         controls.autoForward = false;
         controls.dragToLook = false;
     }
@@ -114,7 +114,7 @@
     });
 
     function toggleCameraControl(event) {
-        if (event.key === 'z' || event.key === 'Z') {
+        if (event.key === 'o' || event.key === 'O') {
             if (trackballRadio.checked) {
                 flyRadio.checked = true;
                 addFlyControl();
@@ -122,7 +122,7 @@
                 trackballRadio.checked = true;
                 addTrackballControl();
             }
-        } else if (event.key === 'x' || event.key === 'X') {
+        } else if (event.key === 'p' || event.key === 'P') {
             if (perspectiveRadio.checked) {
                 orthographicRadio.checked = true;
                 camera = new THREE.OrthographicCamera(window.innerWidth / -30, window.innerWidth / 30, window.innerHeight / 30, window.innerHeight / -30, 0.1, 1000);
