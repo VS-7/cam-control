@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Câmera Control</title>
+  <style>
+    body { margin: 0; overflow: hidden; }
+    #controls { position: absolute; top: 10px; left: 10px; color: #fff; background: rgba(0, 0, 0, 0.5); padding: 10px; }
+  </style>
+</head>
+<body>
+  <div id="controls">
+    <label><input type="radio" name="control" id="Trackball" checked> Trackball</label>
+    <label><input type="radio" name="control" id="Fly"> Fly</label><br>
+    <label><input type="radio" name="projection" id="Perspective" checked> Perspectiva</label>
+    <label><input type="radio" name="projection" id="Orthographic"> Ortográfica</label>
+  </div>
+  <script src="https://cdn.jsdelivr.net/npm/three@latest/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@latest/examples/js/controls/TrackballControls.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@latest/examples/js/controls/FlyControls.js"></script>
+  <script>
+    let scene = new THREE.Scene();
+    let renderer = new THREE.WebGLRenderer({ antialias: false });
+    renderer.setSize(window.innerWidth, window.innerHeight);
+    document.body.appendChild(renderer.domElement);
+
+    let camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+    camera.position.set(0, 10, 10);
+    camera.lookAt(new THREE.Vector3(0, 0, 0));
+
+    let controls = new THREE.TrackballControls(camera, renderer.domElement);
+    controls.rotateSpeed = 2.0;
+    controls.zoomSpeed = 1.2;
+    controls.panSpeed = 0.8;
+    controls.staticMoving = true;
+
+    let cubeGeometry = new THREE.BoxGeometry();
+    let cubeMaterial = new THREE.MeshBasicMaterial({ color: 0xff0000 });
+    let cube = new THREE.Mesh(cubeGeometry, cubeMaterial);
+    scene.add(cube);
+
+    let sphereGeometry = new THREE.SphereGeometry(1);
+    let sphereMaterial = new THREE.MeshBasicMaterial({ color: 0x00ff00 });
+    let sphere = new THREE.Mesh(sphereGeometry, sphereMaterial);
+    sphere.position.set(3, 0, 0);
+    scene.add(sphere);
+
+    function animate() {
+        requestAnimationFrame(animate);
+        controls.update(1 / 60);
+        renderer.render(scene, camera);
+    }
+    animate();
+
+    function addTrackballControl() {
+        if (controls) controls.dispose();
+        controls = new THREE.TrackballControls(camera, renderer.domElement);
+        controls.rotateSpeed = 2.0;
+        controls.zoomSpeed = 1.2;
+        controls.panSpeed = 0.8;
+        controls.staticMoving = true;
+    }
+
+    function addFlyControl() {
+        if (controls) controls.dispose();
+        controls = new THREE.FlyControls(camera, renderer.domElement);
+        controls.movementSpeed = 10;
+        controls.rollSpeed = 0.5;
+        controls.autoForward = false;
+        controls.dragToLook = false;
+    }
+
+    let trackballRadio = document.getElementById('Trackball');
+    let flyRadio = document.getElementById('Fly');
+    let perspectiveRadio = document.getElementById('Perspective');
+    let orthographicRadio = document.getElementById('Orthographic');
+
+    trackballRadio.addEventListener('change', function () {
+        if (trackballRadio.checked) {
+            addTrackballControl();
+        }
+    });
+
+    flyRadio.addEventListener('change', function () {
+        if (flyRadio.checked) {
+            addFlyControl();
+        }
+    });
+
+    perspectiveRadio.addEventListener('change', function () {
+        if (perspectiveRadio.checked) {
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(0, 10, 10);
+            camera.lookAt(new THREE.Vector3(0, 0, 0));
+            if (trackballRadio.checked) {
+                addTrackballControl();
+            } else if (flyRadio.checked) {
+                addFlyControl();
+            }
+        }
+    });
+
+    orthographicRadio.addEventListener('change', function () {
+        if (orthographicRadio.checked) {
+            camera = new THREE.OrthographicCamera(window.innerWidth / -30, window.innerWidth / 30, window.innerHeight / 30, window.innerHeight / -30, 0.1, 1000);
+            camera.position.set(0, 10, 10);
+            camera.lookAt(new THREE.Vector3(0, 0, 0));
+            if (trackballRadio.checked) {
+                addTrackballControl();
+            } else if (flyRadio.checked) {
+                addFlyControl();
+            }
+        }
+    });
+
+    function toggleCameraControl(event) {
+        if (event.key === 'z' || event.key === 'Z') {
+            if (trackballRadio.checked) {
+                flyRadio.checked = true;
+                addFlyControl();
+            } else {
+                trackballRadio.checked = true;
+                addTrackballControl();
+            }
+        } else if (event.key === 'x' || event.key === 'X') {
+            if (perspectiveRadio.checked) {
+                orthographicRadio.checked = true;
+                camera = new THREE.OrthographicCamera(window.innerWidth / -30, window.innerWidth / 30, window.innerHeight / 30, window.innerHeight / -30, 0.1, 1000);
+                camera.position.set(0, 10, 10);
+                camera.lookAt(new THREE.Vector3(0, 0, 0));
+                if (trackballRadio.checked) {
+                    addTrackballControl();
+                } else if (flyRadio.checked) {
+                    addFlyControl();
+                }
+            } else {
+                perspectiveRadio.checked = true;
+                camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+                camera.position.set(0, 10, 10);
+                camera.lookAt(new THREE.Vector3(0, 0, 0));
+                if (trackballRadio.checked) {
+                    addTrackballControl();
+                } else if (flyRadio.checked) {
+                    addFlyControl();
+                }
+            }
+        }
+    }
+
+    document.addEventListener('keypress', toggleCameraControl);
+
+    window.addEventListener('resize', function () {
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        if (camera.isPerspectiveCamera) {
+            camera.aspect = window.innerWidth / window.innerHeight;
+        } else {
+            camera.left = window.innerWidth / -30;
+            camera.right = window.innerWidth / 30;
+            camera.top = window.innerHeight / 30;
+            camera.bottom = window.innerHeight / -30;
+        }
+        camera.updateProjectionMatrix();
+    });
+  </script>
+</body>
+</html>
